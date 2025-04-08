@@ -11,6 +11,8 @@ class Grid:
                 raise ValueError("Invalid data format. Must be a list of lists or a list of strings.")
             if vertical:
                 self.transpose_in_place()
+            flattened = [str(element) for row in self._grid for element in row]
+            self._longest_item = max([len(element) for element in flattened])
 
     @property
     def rows(self):
@@ -23,9 +25,19 @@ class Grid:
     @property
     def grid(self):
         return self._grid
-    
+
     def __str__(self):
-        return '\n'.join([' '.join(map(str, row)) for row in self._grid])
+        # return '\n'.join(['  '.join(map(self.pad, row)) for row in self._grid])
+        # return '\n'.join([' '.join(map(lambda x: str(x) if isinstance(x, str) else str(x[2]), row)) for row in self._grid])
+        return '\n'.join([
+            ' '.join(
+                map(
+                    lambda x: str(x[2]) if isinstance(x, tuple) else (' ' if isinstance(x, str) and not len(x) else str(x)),
+                    row
+                )
+            )
+            for row in self._grid
+        ])
 
     def __eq__(self, other):
         if not isinstance(other, Grid):
@@ -53,6 +65,11 @@ class Grid:
             self._grid[row][col] = value
         else:
             self._grid[idx] = value
+    
+    def pad(self, x):
+        stringified = str(x)
+        padding = self._longest_item - len(stringified)
+        return ' ' * padding +stringified
 
     def get_row(self, row_idx):
         return self._grid[row_idx]
